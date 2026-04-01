@@ -9,27 +9,36 @@
     :root{--bg:#f4f5f7;--surface:#fff;--text:#1a1d21;--muted:#5c6370;--border:#d8dce3;--accent:#2563eb;--accent-hover:#1d4ed8;--danger:#dc2626;--shadow:0 1px 3px rgba(0,0,0,.08);--radius:10px;--font:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif;}
     [data-theme="dark"]{--bg:#0f1216;--surface:#171b22;--text:#e8eaed;--muted:#9aa0a8;--border:#2d3440;--accent:#3b82f6;--danger:#f87171;--shadow:0 1px 3px rgba(0,0,0,.35);}
     *{box-sizing:border-box;}
-    body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.45;min-height:100vh;}
-    .app-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow);}
-    .app-header h1{margin:0;font-size:1.1rem;font-weight:650;}
+    body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.45;min-height:100vh;font-size:16px;}
+
+    /* ── Header ── */
+    .app-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow);}
+    .app-header h1{margin:0;font-size:1.05rem;font-weight:650;}
     .header-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-    button{font-family:inherit;font-size:.875rem;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;transition:background .15s,border-color .15s;}
+
+    /* ── Buttons ── */
+    button{font-family:inherit;font-size:.875rem;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;transition:background .15s,border-color .15s;min-height:40px;}
     button.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
     button.primary:hover{background:var(--accent-hover);}
     button.danger{color:var(--danger);border-color:var(--danger);background:transparent;}
     button.danger:hover{background:rgba(220,38,38,.1);}
     button.ghost{background:transparent;}
     button:disabled{opacity:.5;cursor:not-allowed;}
-    .layout{display:grid;grid-template-columns:1fr;gap:20px;max-width:1100px;margin:0 auto;padding:20px;}
+
+    /* ── Layout ── */
+    .layout{display:grid;grid-template-columns:1fr;gap:16px;max-width:1100px;margin:0 auto;padding:16px;}
     @media(min-width:960px){.layout.has-ai{grid-template-columns:1fr 340px;}}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
-    .card h2{margin:0 0 14px;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
-    .grid-2{display:grid;grid-template-columns:1fr;gap:14px;}
-    @media(min-width:640px){.grid-2{grid-template-columns:1fr 1fr;}}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+    .card h2{margin:0 0 12px;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+    /* ── Form inputs ── */
     label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px;}
-    input[type="text"],input[type="date"],input[type="password"],textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem;}
+    input[type="text"],input[type="date"],input[type="password"],textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem;min-height:40px;}
     textarea{min-height:72px;resize:vertical;}
     input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+
+    /* ── Desktop invoice table ── */
     .table-wrap{overflow-x:auto;border:1px solid #000;background:#fff;}
     table.inv{width:100%;border-collapse:collapse;font-size:.85rem;background:#fff;color:#000;}
     .inv th,.inv td{padding:10px 8px;border:1px solid #000;}
@@ -40,12 +49,34 @@
     .inv td.tr input{text-align:right;}.inv td.tc input{text-align:center;}
     .inv td.amt{font-weight:700;font-variant-numeric:tabular-nums;}
     .ra{width:40px;text-align:center!important;}
-    .totals{margin-top:16px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+    /* NET A PAYER row: empty left cells have no border */
+    .inv td.net-empty{border:none!important;background:transparent;}
+    .inv td.net-label{text-align:center;font-weight:700;border:1px solid #000;}
+    .inv td.net-amt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;border:1px solid #000;}
+
+    /* ── Mobile card layout for lines (≤640px) ── */
+    .line-cards{display:none;flex-direction:column;gap:10px;}
+    .line-card{position:relative;background:#fff;border:1px solid #000;border-radius:6px;padding:12px 12px 10px;color:#000;}
+    .line-card .lc-del{position:absolute;top:8px;right:8px;background:transparent;border:1px solid var(--danger);color:var(--danger);border-radius:6px;padding:3px 9px;font-size:.8rem;cursor:pointer;min-height:32px;}
+    .line-card .lc-del:hover{background:rgba(220,38,38,.1);}
+    .lc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+    .lc-field{display:flex;flex-direction:column;gap:3px;}
+    .lc-field label{font-size:.72rem;color:var(--muted);margin:0;text-transform:uppercase;letter-spacing:.03em;}
+    .lc-field input{padding:7px 9px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem;min-height:38px;width:100%;}
+    .lc-field input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+    .lc-field.full{grid-column:1/-1;}
+    .lc-amt{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:4px;font-weight:700;font-size:.95rem;color:#000;padding-top:8px;border-top:1px solid #e5e7eb;}
+    .lc-amt span{font-size:.75rem;color:var(--muted);font-weight:400;}
+
+    /* ── Totals ── */
+    .totals{margin-top:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
     .trow{display:flex;justify-content:flex-end;gap:24px;min-width:260px;padding:7px 12px;border-radius:6px;font-variant-numeric:tabular-nums;}
     .trow strong{min-width:100px;text-align:right;}
     .trow.net{background:#fff;color:#000;font-weight:700;font-size:1rem;border:2px solid #000;margin-top:4px;}
-    .awords{margin-top:16px;padding:12px;background:#fff;border:1px solid #000;font-size:.9rem;color:#000;text-align:center;text-decoration:underline;font-family:Georgia,serif;}
+    .awords{margin-top:14px;padding:12px;background:#fff;border:1px solid #000;font-size:.9rem;color:#000;text-align:center;text-decoration:underline;font-family:Georgia,serif;}
     .toolbar{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
+
+    /* ── AI panel ── */
     .ai-panel{position:sticky;top:16px;display:flex;flex-direction:column;gap:12px;}
     .ai-panel.hidden{display:none;}
     .qtags{display:flex;flex-wrap:wrap;gap:6px;}
@@ -54,16 +85,45 @@
     .ai-out{min-height:100px;max-height:300px;overflow:auto;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);font-size:.85rem;white-space:pre-wrap;word-break:break-word;}
     .ai-out.err{color:var(--danger);}
     .hint{font-size:.75rem;color:var(--muted);margin-top:4px;}
-    /* Preview modal */
+
+    /* ── Preview modal ── */
     #previewOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center;}
     #previewOverlay.open{display:flex;}
     .preview-box{background:#1e293b;border-radius:12px;overflow:hidden;width:min(860px,96vw);height:min(82vh,720px);display:flex;flex-direction:column;}
     .preview-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#0f172a;color:#fff;flex-shrink:0;}
     .preview-bar span{font-size:.9rem;font-weight:600;color:#e2e8f0;}
-    .preview-bar .pbtn{background:transparent;border:1px solid rgba(255,255,255,.25);color:#e2e8f0;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.82rem;font-family:inherit;}
+    .preview-bar .pbtn{background:transparent;border:1px solid rgba(255,255,255,.25);color:#e2e8f0;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.82rem;font-family:inherit;min-height:36px;}
     .preview-bar .pbtn.dl{background:#2563eb;border-color:#2563eb;color:#fff;}
     .preview-bar .pbtn:hover{opacity:.82;}
-    #previewFrame{flex:1;border:none;width:100%;background:#fff;}
+    .preview-frame-wrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;}
+    #previewFrame{border:none;width:100%;height:100%;min-height:400px;background:#fff;display:block;}
+
+    /* ══════════════════════════════
+       MOBILE OVERRIDES  ≤ 640px
+       ══════════════════════════════ */
+    @media(max-width:640px){
+      .app-header{flex-direction:column;align-items:stretch;gap:10px;}
+      .header-actions{flex-direction:column;gap:8px;}
+      .header-actions button{width:100%;min-height:48px;font-size:1rem;justify-content:center;}
+      .grid-2{grid-template-columns:1fr;}
+      .grid-2 [style*="grid-column"]{grid-column:1!important;}
+      /* Hide desktop table, show card layout */
+      .table-wrap{display:none;}
+      .line-cards{display:flex;}
+      .totals{align-items:stretch;}
+      .trow{min-width:0;justify-content:space-between;}
+      .trow.net{font-size:.95rem;}
+      input[type="text"],input[type="date"],input[type="password"],textarea{min-height:48px;font-size:1rem;padding:11px 13px;}
+      button{min-height:48px;font-size:1rem;}
+      .tag{min-height:36px;display:flex;align-items:center;}
+      label{font-size:.85rem;}
+      .card{padding:14px;}
+      .awords{font-size:.85rem;}
+      /* Modal full-screen on mobile */
+      .preview-box{width:100vw;height:100vh;border-radius:0;}
+      .preview-bar{flex-wrap:wrap;gap:8px;}
+      .preview-bar .pbtn{min-height:42px;flex:1;}
+    }
   </style>
 </head>
 <body>
@@ -73,12 +133,14 @@
   <div class="preview-box">
     <div class="preview-bar">
       <span>Aperçu de la facture</span>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="pbtn dl" id="confirmDownload">Télécharger PDF ↓</button>
         <button class="pbtn" id="closePreview">✕ Fermer</button>
       </div>
     </div>
-    <iframe id="previewFrame" title="Aperçu PDF"></iframe>
+    <div class="preview-frame-wrap">
+      <iframe id="previewFrame" title="Aperçu PDF"></iframe>
+    </div>
   </div>
 </div>
 
@@ -93,7 +155,8 @@
 
 <div class="layout" id="mainLayout">
   <main>
-    <section class="card" style="margin-bottom:16px;">
+    <!-- Vendeur -->
+    <section class="card" style="margin-bottom:14px;">
       <h2>Vendeur</h2>
       <div class="grid-2">
         <div><label>Raison sociale</label><input type="text" id="sellerName"/></div>
@@ -101,14 +164,18 @@
         <div style="grid-column:1/-1;"><label>Adresse</label><input type="text" id="sellerAddress"/></div>
       </div>
     </section>
-    <section class="card" style="margin-bottom:16px;">
+
+    <!-- Client -->
+    <section class="card" style="margin-bottom:14px;">
       <h2>Client</h2>
       <div class="grid-2">
         <div><label>Client</label><input type="text" id="clientName"/></div>
         <div><label>ICE client</label><input type="text" id="clientIce"/></div>
       </div>
     </section>
-    <section class="card" style="margin-bottom:16px;">
+
+    <!-- Facture info -->
+    <section class="card" style="margin-bottom:14px;">
       <h2>Facture</h2>
       <div class="grid-2">
         <div><label>N° de facture</label><input type="text" id="invoiceNumber"/></div>
@@ -116,8 +183,12 @@
         <div style="grid-column:1/-1;"><label>Lieu</label><input type="text" id="invoicePlace" placeholder="CASABLANCA"/></div>
       </div>
     </section>
-    <section class="card" style="margin-bottom:16px;">
+
+    <!-- Lines -->
+    <section class="card" style="margin-bottom:14px;">
       <h2>Lignes</h2>
+
+      <!-- Desktop table -->
       <div class="table-wrap">
         <table class="inv">
           <thead><tr>
@@ -127,13 +198,20 @@
           <tbody id="linesBody"></tbody>
         </table>
       </div>
+
+      <!-- Mobile cards -->
+      <div class="line-cards" id="lineCards"></div>
+
       <div class="toolbar"><button type="button" class="primary" id="addLine">+ Ajouter une ligne</button></div>
+
       <div class="totals">
         <div class="trow"><span>Sous-total TTC</span><strong id="subtotalDisplay">0,00</strong></div>
         <div class="trow net"><span>NET À PAYER</span><strong id="netDisplay">0,00</strong></div>
       </div>
       <div class="awords" id="amountWords">—</div>
     </section>
+
+    <!-- Notes -->
     <section class="card">
       <h2>Notes / conditions de paiement</h2>
       <label>Texte libre (optionnel)</label>
@@ -141,6 +219,7 @@
     </section>
   </main>
 
+  <!-- AI panel -->
   <aside class="ai-panel hidden" id="aiPanel">
     <div class="card">
       <h2>Assistant IA (Claude)</h2>
@@ -164,9 +243,7 @@ const DEFAULT={sellerName:'MALAGA CHIMIE',sellerIce:'003099755000058',sellerAddr
 let lines=[{ref:'JVL',designation:'EAU DE JAVEL',unit:'KG',qty:1852,unitPrice:2.70}];
 let pendingDoc=null;
 
-/* ── Formatters ──
-   fmtPDF: manual space-thousands + comma-decimal (NO locale — avoids jsPDF slash bug)
-   fmtUI:  locale for the browser UI only */
+/* ── Formatters ── */
 function fmtPDF(n){
   var s=Math.abs(n).toFixed(2).split('.');
   var int=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ');
@@ -209,8 +286,16 @@ function formalLine(total){
   return out;
 }
 
-/* ── Render table ── */
+/* ════════════════════════════════════════
+   RENDER — desktop table + mobile cards
+   ════════════════════════════════════════ */
 function renderLines(){
+  renderDesktopTable();
+  renderMobileCards();
+  updateTotals();
+}
+
+function renderDesktopTable(){
   var tb=document.getElementById('linesBody');
   tb.innerHTML='';
   lines.forEach(function(l,i){
@@ -226,6 +311,16 @@ function renderLines(){
       '<td class="ra"><button type="button" class="danger" data-del="'+i+'">×</button></td>';
     tb.appendChild(tr);
   });
+
+  /* NET A PAYER row — fixed: no borders on col 0+1, merged col 2-4 label, col 5 amount */
+  var netTr=document.createElement('tr');
+  netTr.innerHTML=
+    '<td class="net-empty" colspan="2"></td>'+
+    '<td class="net-label" colspan="3">NET A PAYER</td>'+
+    '<td class="net-amt">'+fmtUI(subtotal())+'</td>'+
+    '<td class="net-empty"></td>';
+  tb.appendChild(netTr);
+
   tb.querySelectorAll('input[data-k]').forEach(function(inp){inp.addEventListener('input',onLineInput);});
   tb.querySelectorAll('button[data-del]').forEach(function(btn){
     btn.addEventListener('click',function(){
@@ -234,26 +329,68 @@ function renderLines(){
       lines.splice(i,1);renderLines();
     });
   });
-  updateTotals();
 }
+
+function renderMobileCards(){
+  var container=document.getElementById('lineCards');
+  container.innerHTML='';
+  lines.forEach(function(l,i){
+    var amt=lineAmt(l);
+    var card=document.createElement('div');
+    card.className='line-card';
+    card.innerHTML=
+      '<button type="button" class="lc-del" data-del="'+i+'">× Suppr.</button>'+
+      '<div class="lc-grid">'+
+        '<div class="lc-field"><label>Référence</label><input type="text" data-k="ref" data-i="'+i+'" value="'+esc(l.ref)+'"></div>'+
+        '<div class="lc-field"><label>Unité</label><input type="text" data-k="unit" data-i="'+i+'" value="'+esc(l.unit)+'"></div>'+
+        '<div class="lc-field full"><label>Désignation</label><input type="text" data-k="designation" data-i="'+i+'" value="'+esc(l.designation)+'"></div>'+
+        '<div class="lc-field"><label>Quantité</label><input type="text" inputmode="decimal" data-k="qty" data-i="'+i+'" value="'+esc(String(l.qty))+'"></div>'+
+        '<div class="lc-field"><label>PU TTC</label><input type="text" inputmode="decimal" data-k="unitPrice" data-i="'+i+'" value="'+esc(String(l.unitPrice))+'"></div>'+
+        '<div class="lc-amt"><span>Montant TTC</span><strong data-card-amt="'+i+'">'+fmtUI(amt)+'</strong></div>'+
+      '</div>';
+    container.appendChild(card);
+  });
+  container.querySelectorAll('input[data-k]').forEach(function(inp){inp.addEventListener('input',onLineInput);});
+  container.querySelectorAll('button[data-del]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var i=parseInt(btn.getAttribute('data-del'));
+      if(lines.length<=1)return;
+      lines.splice(i,1);renderLines();
+    });
+  });
+}
+
 function onLineInput(e){
   var k=e.target.getAttribute('data-k'),i=parseInt(e.target.getAttribute('data-i'));
   if(!lines[i])return;
   if(k==='qty'||k==='unitPrice')lines[i][k]=parseNum(e.target.value);
   else lines[i][k]=e.target.value;
-  var c=document.querySelector('[data-amt="'+i+'"]');
-  if(c)c.textContent=fmtUI(lineAmt(lines[i]));
+  /* sync both views */
+  var deskAmt=document.querySelector('[data-amt="'+i+'"]');
+  if(deskAmt)deskAmt.textContent=fmtUI(lineAmt(lines[i]));
+  var cardAmt=document.querySelector('[data-card-amt="'+i+'"]');
+  if(cardAmt)cardAmt.textContent=fmtUI(lineAmt(lines[i]));
+  /* sync sibling input in the other view */
+  document.querySelectorAll('[data-k="'+k+'"][data-i="'+i+'"]').forEach(function(el){
+    if(el!==e.target)el.value=e.target.value;
+  });
   updateTotals();
 }
+
 function updateTotals(){
   var sub=subtotal();
   document.getElementById('subtotalDisplay').textContent=fmtUI(sub);
   document.getElementById('netDisplay').textContent=fmtUI(sub);
   document.getElementById('amountWords').textContent=formalLine(sub);
+  /* update NET row in desktop table */
+  var netAmtCell=document.querySelector('.net-amt');
+  if(netAmtCell)netAmtCell.textContent=fmtUI(sub);
 }
+
 document.getElementById('addLine').addEventListener('click',function(){
   lines.push({ref:'',designation:'',unit:'',qty:0,unitPrice:0});renderLines();
 });
+
 function fillForm(){Object.keys(DEFAULT).forEach(function(k){var el=document.getElementById(k);if(el)el.value=DEFAULT[k];});}
 
 /* ── Theme ── */
@@ -312,9 +449,8 @@ document.getElementById('aiSend').addEventListener('click',async function(){
 
 /* ════════════════════════════════════════
    BUILD PDF
-   - fmtPDF used everywhere (NO locale, NO slash bug)
-   - Footer pinned to bottom of page (H-30)
-   - Single page guaranteed for up to ~15 lines
+   NET A PAYER row: NO borders on col 0+1,
+   merged label across col 2-4, amount in col 5
    ════════════════════════════════════════ */
 function buildPDF(){
   var _j=window.jspdf;
@@ -372,8 +508,7 @@ function buildPDF(){
   doc.line(M,y+1,M+doc.getTextWidth(fStr),y+1);
   y+=9;
 
-  /* ── Table ──
-     Cols (mm): REF=20 DES=58 UN=16 QT=22 PU=26 MNT=38  total=180 */
+  /* ── Table columns (mm): REF=20 DES=58 UN=16 QT=22 PU=26 MNT=38  total=180 ── */
   var cw=[20,58,16,22,26,38];
   var xc=[M];
   for(var ci=0;ci<cw.length;ci++)xc.push(xc[xc.length-1]+cw[ci]);
@@ -386,20 +521,53 @@ function buildPDF(){
   var yc=[y];
   for(var rr=0;rr<rowH.length;rr++)yc.push(yc[yc.length-1]+rowH[rr]);
   var yBot=yc[yc.length-1];
+  var netRowIdx=rowH.length-1; /* index of NET row in yc */
 
-  /* Grid */
+  /* ── Draw grid ──
+     Left cols (0,1) are FULLY OPEN in the NET row — no borders at all,
+     including no top/bottom for that row in those columns.
+     Everything from col 2 rightward forms a clean closed box for the NET row.
+  ── */
   doc.setLineWidth(0.25);
-  for(var cx=0;cx<xc.length;cx++)doc.line(xc[cx],y,xc[cx],yBot);
-  for(var cy=0;cy<yc.length;cy++)doc.line(xc[0],yc[cy],xc[xc.length-1],yc[cy]);
 
-  /* Header */
+  /* Vertical lines */
+  /* Col 0 left edge: header + data rows only (stop BEFORE net row) */
+  doc.line(xc[0],yc[0],xc[0],yc[netRowIdx]);
+  /* Col 1 divider: header + data rows only */
+  doc.line(xc[1],yc[0],xc[1],yc[netRowIdx]);
+  /* Col 2: full height (left wall of NET box) */
+  doc.line(xc[2],yc[0],xc[2],yBot);
+  /* Col 3 divider: header + data rows only (inside merged NET label) */
+  doc.line(xc[3],yc[0],xc[3],yc[netRowIdx]);
+  /* Col 4 divider: header + data rows only */
+  doc.line(xc[4],yc[0],xc[4],yc[netRowIdx]);
+  /* Col 5 divider: full height */
+  doc.line(xc[5],yc[0],xc[5],yBot);
+  /* Col 6 right edge: full height */
+  doc.line(xc[6],yc[0],xc[6],yBot);
+
+  /* Horizontal lines */
+  for(var cy=0;cy<yc.length;cy++){
+    if(cy===netRowIdx){
+      /* Bottom of data row = top of NET row: full width to close JVL/DESIGNATION cell */
+      doc.line(xc[0],yc[cy],xc[6],yc[cy]);
+    } else if(cy===yc.length-1){
+      /* Bottom of NET row: only from col 2 to end */
+      doc.line(xc[2],yc[cy],xc[6],yc[cy]);
+    } else {
+      /* All other rows (header + data): full width */
+      doc.line(xc[0],yc[cy],xc[6],yc[cy]);
+    }
+  }
+
+  /* ── Header labels ── */
   var hLbls=['REFERENCE','DESIGNATION','UNITE','QUANTITE','PU TTC','MONTANT TTC'];
   doc.setFont('helvetica','bold');doc.setFontSize(7.2);
   for(var hi=0;hi<6;hi++){
     doc.text(hLbls[hi],(xc[hi]+xc[hi+1])/2,yc[0]+HDR/2+2,{align:'center'});
   }
 
-  /* Data rows */
+  /* ── Data rows ── */
   doc.setFont('helvetica','bold');doc.setFontSize(9);
   var PAD=2;
   for(var di=0;di<lines.length;di++){
@@ -411,22 +579,25 @@ function buildPDF(){
     doc.text(String(ln.designation||''),xc[1]+PAD,midY);
     doc.text(String(ln.unit||''),(xc[2]+xc[3])/2,midY,{align:'center'});
     doc.text(String(ln.qty),(xc[3]+xc[4])/2,midY,{align:'center'});
-    /* PU TTC — fmtPDF, right-aligned */
     doc.text(fmtPDF(ln.unitPrice),xc[5]-PAD,midY,{align:'right'});
-    /* MONTANT TTC — fmtPDF, right-aligned */
     doc.text(fmtPDF(amt),xc[6]-PAD,midY,{align:'right'});
   }
 
-  /* NET row */
-  var netY=yc[1+lines.length];
+  /* ── NET A PAYER row ──
+     Label centered across col 2-4 (xc[2] → xc[5])
+     Amount right-aligned in col 5 (xc[5] → xc[6])
+     Columns 0 and 1 are intentionally blank with no borders */
+  var netY=yc[netRowIdx];
   var netMid=netY+NET/2+2.5;
   doc.setFont('helvetica','bold');doc.setFontSize(9);
-  doc.text('NET A PAYER',(xc[2]+xc[5])/2,netMid,{align:'center'});
+  /* Center of merged cols 2-4 */
+  var netLabelCx=(xc[2]+xc[5])/2;
+  doc.text('NET A PAYER',netLabelCx,netMid,{align:'center'});
   doc.text(fmtPDF(sub),xc[6]-PAD,netMid,{align:'right'});
 
   y=yBot+10;
 
-  /* Amount in words */
+  /* ── Amount in words ── */
   var words=formalLine(sub);
   doc.setFont('helvetica','normal');doc.setFontSize(8.5);
   var wLines=doc.splitTextToSize(words,W-2*M);
@@ -438,7 +609,7 @@ function buildPDF(){
   }
   y+=4;
 
-  /* Notes */
+  /* ── Notes ── */
   if(notes){
     doc.setFont('helvetica','bold');doc.setFontSize(9);
     doc.text('Notes',M,y);y+=5;
@@ -447,7 +618,7 @@ function buildPDF(){
     doc.text(nLines,M,y);
   }
 
-  /* Footer — ALWAYS pinned to page bottom, never causes page 2 */
+  /* ── Footer pinned to page bottom ── */
   var footY=H-28;
   doc.setLineWidth(1.1);
   doc.line(M,footY,W-M,footY);
