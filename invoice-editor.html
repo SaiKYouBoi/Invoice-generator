@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Éditeur de facture — MALAGA CHIMIE</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <style>
+    :root{--bg:#f4f5f7;--surface:#fff;--text:#1a1d21;--muted:#5c6370;--border:#d8dce3;--accent:#2563eb;--accent-hover:#1d4ed8;--danger:#dc2626;--shadow:0 1px 3px rgba(0,0,0,.08);--radius:10px;--font:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif;}
+    [data-theme="dark"]{--bg:#0f1216;--surface:#171b22;--text:#e8eaed;--muted:#9aa0a8;--border:#2d3440;--accent:#3b82f6;--danger:#f87171;--shadow:0 1px 3px rgba(0,0,0,.35);}
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.45;min-height:100vh;}
+    .app-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow);}
+    .app-header h1{margin:0;font-size:1.1rem;font-weight:650;}
+    .header-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+    button{font-family:inherit;font-size:.875rem;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;transition:background .15s,border-color .15s;}
+    button.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+    button.primary:hover{background:var(--accent-hover);}
+    button.danger{color:var(--danger);border-color:var(--danger);background:transparent;}
+    button.danger:hover{background:rgba(220,38,38,.1);}
+    button.ghost{background:transparent;}
+    button:disabled{opacity:.5;cursor:not-allowed;}
+    .layout{display:grid;grid-template-columns:1fr;gap:20px;max-width:1100px;margin:0 auto;padding:20px;}
+    @media(min-width:960px){.layout.has-ai{grid-template-columns:1fr 340px;}}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
+    .card h2{margin:0 0 14px;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+    .grid-2{display:grid;grid-template-columns:1fr;gap:14px;}
+    @media(min-width:640px){.grid-2{grid-template-columns:1fr 1fr;}}
+    label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px;}
+    input[type="text"],input[type="date"],input[type="password"],textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem;}
+    textarea{min-height:72px;resize:vertical;}
+    input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+    .table-wrap{overflow-x:auto;border:1px solid #000;background:#fff;}
+    table.inv{width:100%;border-collapse:collapse;font-size:.85rem;background:#fff;color:#000;}
+    .inv th,.inv td{padding:10px 8px;border:1px solid #000;}
+    .inv th{font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.02em;text-align:center;}
+    .inv td.tc{text-align:center;}.inv td.tl{text-align:left;}.inv td.tr{text-align:right;font-variant-numeric:tabular-nums;}
+    .inv input{width:100%;min-width:0;padding:5px 6px;font-size:.85rem;background:transparent;color:#000;border:none;font-family:inherit;}
+    .inv input:focus{outline:1px solid var(--accent);border-radius:3px;}
+    .inv td.tr input{text-align:right;}.inv td.tc input{text-align:center;}
+    .inv td.amt{font-weight:700;font-variant-numeric:tabular-nums;}
+    .ra{width:40px;text-align:center!important;}
+    .totals{margin-top:16px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+    .trow{display:flex;justify-content:flex-end;gap:24px;min-width:260px;padding:7px 12px;border-radius:6px;font-variant-numeric:tabular-nums;}
+    .trow strong{min-width:100px;text-align:right;}
+    .trow.net{background:#fff;color:#000;font-weight:700;font-size:1rem;border:2px solid #000;margin-top:4px;}
+    .awords{margin-top:16px;padding:12px;background:#fff;border:1px solid #000;font-size:.9rem;color:#000;text-align:center;text-decoration:underline;font-family:Georgia,serif;}
+    .toolbar{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
+    .ai-panel{position:sticky;top:16px;display:flex;flex-direction:column;gap:12px;}
+    .ai-panel.hidden{display:none;}
+    .qtags{display:flex;flex-wrap:wrap;gap:6px;}
+    .tag{font-size:.75rem;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--accent);}
+    .tag:hover{border-color:var(--accent);}
+    .ai-out{min-height:100px;max-height:300px;overflow:auto;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);font-size:.85rem;white-space:pre-wrap;word-break:break-word;}
+    .ai-out.err{color:var(--danger);}
+    .hint{font-size:.75rem;color:var(--muted);margin-top:4px;}
+    /* Preview modal */
+    #previewOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center;}
+    #previewOverlay.open{display:flex;}
+    .preview-box{background:#1e293b;border-radius:12px;overflow:hidden;width:min(860px,96vw);height:min(82vh,720px);display:flex;flex-direction:column;}
+    .preview-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#0f172a;color:#fff;flex-shrink:0;}
+    .preview-bar span{font-size:.9rem;font-weight:600;color:#e2e8f0;}
+    .preview-bar .pbtn{background:transparent;border:1px solid rgba(255,255,255,.25);color:#e2e8f0;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.82rem;font-family:inherit;}
+    .preview-bar .pbtn.dl{background:#2563eb;border-color:#2563eb;color:#fff;}
+    .preview-bar .pbtn:hover{opacity:.82;}
+    #previewFrame{flex:1;border:none;width:100%;background:#fff;}
+  </style>
+</head>
+<body>
+
+<!-- Preview Modal -->
+<div id="previewOverlay">
+  <div class="preview-box">
+    <div class="preview-bar">
+      <span>Aperçu de la facture</span>
+      <div style="display:flex;gap:8px;">
+        <button class="pbtn dl" id="confirmDownload">Télécharger PDF ↓</button>
+        <button class="pbtn" id="closePreview">✕ Fermer</button>
+      </div>
+    </div>
+    <iframe id="previewFrame" title="Aperçu PDF"></iframe>
+  </div>
+</div>
+
+<header class="app-header">
+  <h1>Éditeur de facture</h1>
+  <div class="header-actions">
+    <button type="button" class="ghost" id="themeToggle">Thème</button>
+    <button type="button" class="ghost" id="toggleAi">Assistant IA</button>
+    <button type="button" class="primary" id="exportPdf">Aperçu &amp; PDF ↓</button>
+  </div>
+</header>
+
+<div class="layout" id="mainLayout">
+  <main>
+    <section class="card" style="margin-bottom:16px;">
+      <h2>Vendeur</h2>
+      <div class="grid-2">
+        <div><label>Raison sociale</label><input type="text" id="sellerName"/></div>
+        <div><label>ICE</label><input type="text" id="sellerIce"/></div>
+        <div style="grid-column:1/-1;"><label>Adresse</label><input type="text" id="sellerAddress"/></div>
+      </div>
+    </section>
+    <section class="card" style="margin-bottom:16px;">
+      <h2>Client</h2>
+      <div class="grid-2">
+        <div><label>Client</label><input type="text" id="clientName"/></div>
+        <div><label>ICE client</label><input type="text" id="clientIce"/></div>
+      </div>
+    </section>
+    <section class="card" style="margin-bottom:16px;">
+      <h2>Facture</h2>
+      <div class="grid-2">
+        <div><label>N° de facture</label><input type="text" id="invoiceNumber"/></div>
+        <div><label>Date</label><input type="date" id="invoiceDate"/></div>
+        <div style="grid-column:1/-1;"><label>Lieu</label><input type="text" id="invoicePlace" placeholder="CASABLANCA"/></div>
+      </div>
+    </section>
+    <section class="card" style="margin-bottom:16px;">
+      <h2>Lignes</h2>
+      <div class="table-wrap">
+        <table class="inv">
+          <thead><tr>
+            <th>Référence</th><th>Désignation</th><th>Unité</th>
+            <th>Quantité</th><th>PU TTC</th><th>Montant TTC</th><th></th>
+          </tr></thead>
+          <tbody id="linesBody"></tbody>
+        </table>
+      </div>
+      <div class="toolbar"><button type="button" class="primary" id="addLine">+ Ajouter une ligne</button></div>
+      <div class="totals">
+        <div class="trow"><span>Sous-total TTC</span><strong id="subtotalDisplay">0,00</strong></div>
+        <div class="trow net"><span>NET À PAYER</span><strong id="netDisplay">0,00</strong></div>
+      </div>
+      <div class="awords" id="amountWords">—</div>
+    </section>
+    <section class="card">
+      <h2>Notes / conditions de paiement</h2>
+      <label>Texte libre (optionnel)</label>
+      <textarea id="notes" placeholder="Mentions légales, RIB, délais…"></textarea>
+    </section>
+  </main>
+
+  <aside class="ai-panel hidden" id="aiPanel">
+    <div class="card">
+      <h2>Assistant IA (Claude)</h2>
+      <p class="hint">Clé API stockée localement.</p>
+      <label>Clé API Anthropic</label>
+      <input type="password" id="apiKey" autocomplete="off" placeholder="sk-ant-api03-…" style="margin-bottom:10px;"/>
+      <label>Votre demande</label>
+      <textarea id="aiPrompt" rows="4" placeholder="Ex.: reformule les notes en style formel…"></textarea>
+      <div style="margin:8px 0 10px;"><div class="hint" style="margin-bottom:6px;">Raccourcis</div><div class="qtags" id="quickTags"></div></div>
+      <button type="button" class="primary" id="aiSend" style="width:100%;margin-bottom:10px;">Envoyer à Claude</button>
+      <div class="ai-out" id="aiOutput">La réponse apparaîtra ici.</div>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const DEFAULT={sellerName:'MALAGA CHIMIE',sellerIce:'003099755000058',sellerAddress:'RESIDENCE AL BADR LOT NR 11 IMM 99 APT 7',clientName:'STE POLYMER DALI SARL',clientIce:'003363099000064',invoiceNumber:'0126/2024',invoiceDate:'2024-12-27',invoicePlace:'CASABLANCA',notes:''};
+let lines=[{ref:'JVL',designation:'EAU DE JAVEL',unit:'KG',qty:1852,unitPrice:2.70}];
+let pendingDoc=null;
+
+/* ── Formatters ──
+   fmtPDF: manual space-thousands + comma-decimal (NO locale — avoids jsPDF slash bug)
+   fmtUI:  locale for the browser UI only */
+function fmtPDF(n){
+  var s=Math.abs(n).toFixed(2).split('.');
+  var int=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+  return(n<0?'-':'')+int+','+s[1];
+}
+function fmtUI(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function parseNum(v){var n=parseFloat(String(v).replace(',','.'));return Number.isFinite(n)?n:0;}
+function lineAmt(l){return Math.round(l.qty*l.unitPrice*100)/100;}
+function subtotal(){return lines.reduce(function(s,l){return s+lineAmt(l);},0);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+/* ── French words ── */
+var U=['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf'];
+var T=['dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+function u20(n){return n<10?U[n]:n<17?T[n-10]:'dix-'+U[n-10];}
+function u100(n){
+  if(n<20)return u20(n);
+  var d=Math.floor(n/10),r=n%10,tens=['vingt','trente','quarante','cinquante','soixante'];
+  if(d>=2&&d<=6){var b=tens[d-2];if(r===0)return d===8?'quatre-vingts':b;if(r===1&&d!==8)return b+'-et-un';return b+'-'+U[r];}
+  if(n===70)return 'soixante-dix';if(n===71)return 'soixante-et-onze';
+  if(n<80)return 'soixante-'+u20(n-60);if(n===80)return 'quatre-vingts';
+  if(n===81)return 'quatre-vingt-un';if(n<90)return 'quatre-vingt-'+U[n-80];
+  return 'quatre-vingt-'+T[n-90];
+}
+function u1000(n){
+  if(n<100)return u100(n);
+  var h=Math.floor(n/100),r=n%100,p=h===1?'cent':U[h]+' cent';
+  if(r===0)return h>1?p+'s':p;return p+' '+u100(r);
+}
+function toWords(n){
+  if(n===0)return 'zéro';if(n<1000)return u1000(n);
+  var k=Math.floor(n/1000),r=n%1000,left=k===1?'mille':u1000(k)+' mille';
+  return r===0?left:left+' '+u1000(r);
+}
+function cap(s){return s.split(/\s+/).map(function(w){return w.split('-').map(function(p){return p[0].toUpperCase()+p.slice(1);}).join('-');}).join(' ');}
+function formalLine(total){
+  var r=Math.round(total*100)/100,i=Math.floor(r+1e-9),d=Math.round((r-i)*100);
+  var out='Le présent de la facture est arrêté à la Somme de '+cap(toWords(i))+(i>1?' Dirhams':' Dirham');
+  if(d>0)out+=' et '+cap(toWords(d))+(d>1?' Centimes':' Centime');
+  return out;
+}
+
+/* ── Render table ── */
+function renderLines(){
+  var tb=document.getElementById('linesBody');
+  tb.innerHTML='';
+  lines.forEach(function(l,i){
+    var amt=lineAmt(l);
+    var tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td class="tc"><input type="text" data-k="ref" data-i="'+i+'" value="'+esc(l.ref)+'"></td>'+
+      '<td class="tl"><input type="text" data-k="designation" data-i="'+i+'" value="'+esc(l.designation)+'"></td>'+
+      '<td class="tc"><input type="text" data-k="unit" data-i="'+i+'" value="'+esc(l.unit)+'"></td>'+
+      '<td class="tc"><input type="text" inputmode="decimal" data-k="qty" data-i="'+i+'" value="'+esc(String(l.qty))+'"></td>'+
+      '<td class="tr"><input type="text" inputmode="decimal" data-k="unitPrice" data-i="'+i+'" value="'+esc(String(l.unitPrice))+'"></td>'+
+      '<td class="tr amt" data-amt="'+i+'">'+fmtUI(amt)+'</td>'+
+      '<td class="ra"><button type="button" class="danger" data-del="'+i+'">×</button></td>';
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('input[data-k]').forEach(function(inp){inp.addEventListener('input',onLineInput);});
+  tb.querySelectorAll('button[data-del]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var i=parseInt(btn.getAttribute('data-del'));
+      if(lines.length<=1)return;
+      lines.splice(i,1);renderLines();
+    });
+  });
+  updateTotals();
+}
+function onLineInput(e){
+  var k=e.target.getAttribute('data-k'),i=parseInt(e.target.getAttribute('data-i'));
+  if(!lines[i])return;
+  if(k==='qty'||k==='unitPrice')lines[i][k]=parseNum(e.target.value);
+  else lines[i][k]=e.target.value;
+  var c=document.querySelector('[data-amt="'+i+'"]');
+  if(c)c.textContent=fmtUI(lineAmt(lines[i]));
+  updateTotals();
+}
+function updateTotals(){
+  var sub=subtotal();
+  document.getElementById('subtotalDisplay').textContent=fmtUI(sub);
+  document.getElementById('netDisplay').textContent=fmtUI(sub);
+  document.getElementById('amountWords').textContent=formalLine(sub);
+}
+document.getElementById('addLine').addEventListener('click',function(){
+  lines.push({ref:'',designation:'',unit:'',qty:0,unitPrice:0});renderLines();
+});
+function fillForm(){Object.keys(DEFAULT).forEach(function(k){var el=document.getElementById(k);if(el)el.value=DEFAULT[k];});}
+
+/* ── Theme ── */
+document.getElementById('themeToggle').addEventListener('click',function(){
+  var d=document.documentElement.getAttribute('data-theme')==='dark';
+  d?document.documentElement.removeAttribute('data-theme'):document.documentElement.setAttribute('data-theme','dark');
+});
+
+/* ── AI panel ── */
+document.getElementById('toggleAi').addEventListener('click',function(){
+  var p=document.getElementById('aiPanel');
+  document.getElementById('mainLayout').classList.toggle('has-ai',p.classList.toggle('hidden')===false);
+});
+var QUICK=[
+  {label:'Montant en lettres (FR)',text:'Convertis le montant total TTC en lettres en français (dirhams).'},
+  {label:'Ajouter une note',text:'Propose une courte note professionnelle de bas de facture en français.'},
+  {label:'Vérifier les totaux',text:'Vérifie la cohérence : Qté × PU TTC = Montant TTC pour chaque ligne, puis somme = NET À PAYER.'},
+  {label:'Traduire en arabe',text:'Traduis les informations principales en arabe standard.'}
+];
+var qt=document.getElementById('quickTags');
+QUICK.forEach(function(q){
+  var b=document.createElement('button');b.type='button';b.className='tag';b.textContent=q.label;
+  b.addEventListener('click',function(){document.getElementById('aiPrompt').value=q.text;});
+  qt.appendChild(b);
+});
+var apiKeyEl=document.getElementById('apiKey');
+apiKeyEl.value=localStorage.getItem('inv-api-key')||'';
+apiKeyEl.addEventListener('change',function(){localStorage.setItem('inv-api-key',apiKeyEl.value.trim());});
+function invoiceCtx(){
+  var sub=subtotal();
+  return 'Vendeur: '+document.getElementById('sellerName').value+'\nICE: '+document.getElementById('sellerIce').value+
+    '\nClient: '+document.getElementById('clientName').value+'\nICE client: '+document.getElementById('clientIce').value+
+    '\nN°: '+document.getElementById('invoiceNumber').value+'\nDate: '+document.getElementById('invoiceDate').value+
+    '\nLignes:\n'+lines.map(function(l,i){return (i+1)+'. '+l.ref+' '+l.designation+' '+l.unit+' qty='+l.qty+' PU='+l.unitPrice+' Mnt='+fmtPDF(lineAmt(l));}).join('\n')+
+    '\nNET À PAYER: '+fmtPDF(sub);
+}
+document.getElementById('aiSend').addEventListener('click',async function(){
+  var key=apiKeyEl.value.trim();
+  var out=document.getElementById('aiOutput');
+  var btn=document.getElementById('aiSend');
+  if(!key){out.textContent='Entrez une clé API Anthropic.';out.className='ai-out err';return;}
+  localStorage.setItem('inv-api-key',key);
+  var userText=document.getElementById('aiPrompt').value.trim();
+  out.className='ai-out';out.textContent='Envoi en cours…';btn.disabled=true;
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1024,
+        messages:[{role:'user',content:'Contexte facture:\n'+invoiceCtx()+'\n\nDemande: '+(userText||'Analyse la facture.')}]})});
+    var data=await res.json();
+    if(!res.ok)throw new Error(data.error&&data.error.message?data.error.message:res.status);
+    out.textContent=(data.content||[]).map(function(b){return b.type==='text'?b.text:'';}).join('')||'(vide)';
+  }catch(err){out.textContent='Erreur: '+err.message;out.className='ai-out err';}
+  btn.disabled=false;
+});
+
+/* ════════════════════════════════════════
+   BUILD PDF
+   - fmtPDF used everywhere (NO locale, NO slash bug)
+   - Footer pinned to bottom of page (H-30)
+   - Single page guaranteed for up to ~15 lines
+   ════════════════════════════════════════ */
+function buildPDF(){
+  var _j=window.jspdf;
+  var jsPDF=_j&&_j.jsPDF?_j.jsPDF:window.jsPDF;
+  if(!jsPDF){alert('jsPDF non chargé.');return null;}
+
+  var doc=new jsPDF({unit:'mm',format:'a4'});
+  var W=210,H=297,M=15;
+  var y=15;
+
+  var sellerName    =document.getElementById('sellerName').value||'';
+  var sellerIce     =document.getElementById('sellerIce').value||'';
+  var sellerAddress =document.getElementById('sellerAddress').value||'';
+  var clientName    =document.getElementById('clientName').value||'';
+  var clientIce     =document.getElementById('clientIce').value||'';
+  var invNum        =document.getElementById('invoiceNumber').value||'';
+  var invDate       =document.getElementById('invoiceDate').value;
+  var invPlace      =(document.getElementById('invoicePlace').value||'CASABLANCA').trim().toUpperCase();
+  var notes         =document.getElementById('notes').value.trim();
+  var sub           =subtotal();
+  var dateFr        =invDate?new Date(invDate+'T12:00:00').toLocaleDateString('fr-FR'):'';
+
+  doc.setTextColor(0,0,0);doc.setDrawColor(0,0,0);
+
+  /* Seller title */
+  doc.setFont('times','bold');doc.setFontSize(16);
+  var tw=doc.getTextWidth(sellerName.toUpperCase());
+  doc.text(sellerName.toUpperCase(),W/2,y,{align:'center'});
+  doc.setLineWidth(0.3);
+  doc.line(W/2-tw/2,y+1.3,W/2+tw/2,y+1.3);
+  doc.line(W/2-tw/2,y+2.5,W/2+tw/2,y+2.5);
+  y+=9;
+
+  /* Date line */
+  var dl=invPlace+', LE '+dateFr;
+  doc.setFont('helvetica','bolditalic');doc.setFontSize(9.5);
+  doc.text(dl,W-M,y,{align:'right'});
+  var dtw=doc.getTextWidth(dl);
+  doc.line(W-M-dtw,y+1,W-M,y+1);
+  y+=9;
+
+  /* Client box */
+  var bW=110,bH=18,bX=(W-bW)/2;
+  doc.setLineWidth(0.25);doc.rect(bX,y,bW,bH,'S');
+  doc.setFont('helvetica','bold');doc.setFontSize(10.5);
+  doc.text(clientName.toUpperCase(),W/2,y+7,{align:'center'});
+  doc.setFontSize(9);
+  doc.text('ICE : '+clientIce,W/2,y+14,{align:'center'});
+  y+=bH+7;
+
+  /* Invoice number */
+  doc.setFont('helvetica','bold');doc.setFontSize(10.5);
+  var fStr='FACTURE N° : '+invNum;
+  doc.text(fStr,M,y);
+  doc.line(M,y+1,M+doc.getTextWidth(fStr),y+1);
+  y+=9;
+
+  /* ── Table ──
+     Cols (mm): REF=20 DES=58 UN=16 QT=22 PU=26 MNT=38  total=180 */
+  var cw=[20,58,16,22,26,38];
+  var xc=[M];
+  for(var ci=0;ci<cw.length;ci++)xc.push(xc[xc.length-1]+cw[ci]);
+
+  var HDR=7,ROW=11,NET=8;
+  var rowH=[HDR];
+  for(var ri=0;ri<lines.length;ri++)rowH.push(ROW);
+  rowH.push(NET);
+
+  var yc=[y];
+  for(var rr=0;rr<rowH.length;rr++)yc.push(yc[yc.length-1]+rowH[rr]);
+  var yBot=yc[yc.length-1];
+
+  /* Grid */
+  doc.setLineWidth(0.25);
+  for(var cx=0;cx<xc.length;cx++)doc.line(xc[cx],y,xc[cx],yBot);
+  for(var cy=0;cy<yc.length;cy++)doc.line(xc[0],yc[cy],xc[xc.length-1],yc[cy]);
+
+  /* Header */
+  var hLbls=['REFERENCE','DESIGNATION','UNITE','QUANTITE','PU TTC','MONTANT TTC'];
+  doc.setFont('helvetica','bold');doc.setFontSize(7.2);
+  for(var hi=0;hi<6;hi++){
+    doc.text(hLbls[hi],(xc[hi]+xc[hi+1])/2,yc[0]+HDR/2+2,{align:'center'});
+  }
+
+  /* Data rows */
+  doc.setFont('helvetica','bold');doc.setFontSize(9);
+  var PAD=2;
+  for(var di=0;di<lines.length;di++){
+    var ln=lines[di];
+    var amt=lineAmt(ln);
+    var ry0=yc[1+di];
+    var midY=ry0+ROW/2+2.6;
+    doc.text(String(ln.ref||''),(xc[0]+xc[1])/2,midY,{align:'center'});
+    doc.text(String(ln.designation||''),xc[1]+PAD,midY);
+    doc.text(String(ln.unit||''),(xc[2]+xc[3])/2,midY,{align:'center'});
+    doc.text(String(ln.qty),(xc[3]+xc[4])/2,midY,{align:'center'});
+    /* PU TTC — fmtPDF, right-aligned */
+    doc.text(fmtPDF(ln.unitPrice),xc[5]-PAD,midY,{align:'right'});
+    /* MONTANT TTC — fmtPDF, right-aligned */
+    doc.text(fmtPDF(amt),xc[6]-PAD,midY,{align:'right'});
+  }
+
+  /* NET row */
+  var netY=yc[1+lines.length];
+  var netMid=netY+NET/2+2.5;
+  doc.setFont('helvetica','bold');doc.setFontSize(9);
+  doc.text('NET A PAYER',(xc[2]+xc[5])/2,netMid,{align:'center'});
+  doc.text(fmtPDF(sub),xc[6]-PAD,netMid,{align:'right'});
+
+  y=yBot+10;
+
+  /* Amount in words */
+  var words=formalLine(sub);
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  var wLines=doc.splitTextToSize(words,W-2*M);
+  for(var wl=0;wl<wLines.length;wl++){
+    var lw=doc.getTextWidth(wLines[wl]);
+    doc.text(wLines[wl],W/2,y,{align:'center'});
+    doc.line(W/2-lw/2,y+1.1,W/2+lw/2,y+1.1);
+    y+=4.8;
+  }
+  y+=4;
+
+  /* Notes */
+  if(notes){
+    doc.setFont('helvetica','bold');doc.setFontSize(9);
+    doc.text('Notes',M,y);y+=5;
+    doc.setFont('helvetica','normal');
+    var nLines=doc.splitTextToSize(notes,W-2*M);
+    doc.text(nLines,M,y);
+  }
+
+  /* Footer — ALWAYS pinned to page bottom, never causes page 2 */
+  var footY=H-28;
+  doc.setLineWidth(1.1);
+  doc.line(M,footY,W-M,footY);
+  footY+=6.5;
+  doc.setFont('helvetica','bold');doc.setFontSize(9.5);
+  doc.text(sellerName.toUpperCase(),W/2,footY,{align:'center'});
+  footY+=5.5;
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  var fAddr=doc.splitTextToSize(sellerAddress.toUpperCase(),W-2*M);
+  doc.text(fAddr,W/2,footY,{align:'center'});
+  footY+=fAddr.length*4.2;
+  doc.text('ICE N° '+sellerIce,W/2,footY,{align:'center'});
+
+  return doc;
+}
+
+/* ── Preview & download ── */
+document.getElementById('exportPdf').addEventListener('click',function(){
+  var doc=buildPDF();
+  if(!doc)return;
+  pendingDoc=doc;
+  document.getElementById('previewFrame').src=doc.output('datauristring');
+  document.getElementById('previewOverlay').classList.add('open');
+});
+document.getElementById('closePreview').addEventListener('click',function(){
+  document.getElementById('previewOverlay').classList.remove('open');
+  document.getElementById('previewFrame').src='';
+  pendingDoc=null;
+});
+document.getElementById('confirmDownload').addEventListener('click',function(){
+  if(!pendingDoc)return;
+  var invNum=document.getElementById('invoiceNumber').value||'facture';
+  pendingDoc.save('Facture_'+invNum.replace(/[^\w\-]/g,'_')+'.pdf');
+  document.getElementById('previewOverlay').classList.remove('open');
+  document.getElementById('previewFrame').src='';
+  pendingDoc=null;
+});
+document.getElementById('previewOverlay').addEventListener('click',function(e){
+  if(e.target===this){
+    this.classList.remove('open');
+    document.getElementById('previewFrame').src='';
+    pendingDoc=null;
+  }
+});
+
+fillForm();
+renderLines();
+})();
+</script>
+</body>
+</html>
