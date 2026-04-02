@@ -1542,9 +1542,9 @@
 
         /* Date line */
         var dl = invPlace + ", LE " + dateFr;
-        doc.setFont("helvetica", "bolditalic");
+        pdfSetFont(doc, "helvetica", "bolditalic");
         doc.setFontSize(9.5);
-        doc.text(dl, W - M, y, { align: "right" });
+        pdfText(doc, dl, W - M, y, { align: "right" });
         var dtw = doc.getTextWidth(dl);
         doc.line(W - M - dtw, y + 1, W - M, y + 1);
         y += 9;
@@ -1561,14 +1561,14 @@
           align: "center",
         });
         doc.setFontSize(9);
-        doc.text("ICE : " + clientIce, W / 2, y + 14, { align: "center" });
+        pdfText(doc, "ICE : " + clientIce, W / 2, y + 14, { align: "center" });
         y += bH + 7;
 
         /* Invoice number */
         pdfSetFont(doc, "helvetica", "bold");
         doc.setFontSize(10.5);
-        var fStr = "FACTURE N° : " + invNum;
-        doc.text(fStr, M, y);
+        var fStr = "FACTURE N\u00B0 : " + invNum;
+        pdfText(doc, fStr, M, y);
         doc.line(M, y + 1, M + doc.getTextWidth(fStr), y + 1);
         y += 9;
 
@@ -1730,7 +1730,7 @@
         );
         pdfText(doc, fAddr, W / 2, footY, { align: "center" });
         footY += fAddr.length * 4.2;
-        doc.text("ICE N° " + sellerIce, W / 2, footY, { align: "center" });
+        pdfText(doc, "ICE N\u00B0 " + sellerIce, W / 2, footY, { align: "center" });
 
         return doc;
       }
